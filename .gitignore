@@ -1,0 +1,8 @@
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Rendered diagram output (regenerate with scripts/render.sh)
+designs/*/diagrams/
