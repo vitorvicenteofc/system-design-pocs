@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context diagram for URL Shortener
+
+Person(user, "User", "Creates short URLs and follows short links")
+
+System(shortener, "URL Shortener App", "Shortens URLs and redirects users via short.example.com")
+
+System_Ext(mongo, "MongoDB Atlas", "External persistence for full URL and hash mappings")
+System_Ext(cache, "ElastiCache", "External in-memory cache for hash lookup results")
+
+Rel(user, shortener, "Creates short URLs and follows short links", "HTTPS")
+Rel(shortener, mongo, "Stores and reads URL mappings", "MongoDB wire protocol")
+Rel(shortener, cache, "Caches hash lookups", "Redis protocol")
+
+@enduml

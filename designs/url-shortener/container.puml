@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container diagram for URL Shortener
+
+Person(user, "User", "Uses the web app and navigates https://short.example.com/{hash}")
+
+System_Boundary(shortener, "URL Shortener App") {
+    Container(web_app, "Web Application", "React (vanilla SPA)", "Paste full URL and receive shortened URL on short.example.com")
+    Container(shorten_fn, "Shorten Function", "AWS Lambda", "8-char hash via NPM module; persists full URL + hash; returns short URL")
+    Container(redirect_fn, "Redirect Function", "AWS Lambda", "Resolves hash via ElastiCache or MongoDB; caches result; redirects to full URL")
+}
+
+ContainerDb_Ext(mongo, "MongoDB Atlas", "MongoDB Atlas", "External store for full URL and hash; hash column indexed")
+ContainerDb_Ext(cache, "ElastiCache", "AWS ElastiCache (in-memory)", "External cache for hash-to-URL lookups; 8h TTL")
+
+Rel(user, web_app, "Uses", "HTTPS")
+Rel(web_app, shorten_fn, "Submits URL to shorten", "HTTP")
+Rel(shorten_fn, mongo, "Persists full URL and hash", "MongoDB wire protocol")
+Rel(user, redirect_fn, "Requests short URL", "HTTP")
+Rel(redirect_fn, cache, "Checks cache for hash", "Redis protocol")
+Rel(redirect_fn, mongo, "Looks up hash on cache miss", "MongoDB wire protocol")
+Rel(redirect_fn, cache, "Stores lookup result", "Redis protocol")
+Rel(redirect_fn, user, "Redirects to full URL", "HTTP 302")
+
+@enduml
