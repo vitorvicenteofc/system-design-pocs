@@ -1,0 +1,43 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+title Deployment diagram for URL Shortener v2
+
+Deployment_Node(aws, "AWS Region", "AWS") {
+    Deployment_Node(apigw_node, "API Gateway Stage", "Amazon API Gateway") {
+        Container(apigw, "API Gateway", "Amazon API Gateway", "Throttling and route integration to Lambda")
+    }
+
+    Deployment_Node(lambda_node, "Lambda", "AWS Lambda") {
+        Container(shorten_fn, "Shorten Function", "AWS Lambda", "On-demand scaling")
+        Container(redirect_fn, "Redirect Function", "AWS Lambda", "Provisioned concurrency: 25-50 warm instances")
+    }
+
+    Deployment_Node(cache_node, "ElastiCache Cluster", "AWS ElastiCache") {
+        ContainerDb(cache, "ElastiCache", "Redis", "In-memory cache; 8h TTL; sized for hot hash working set")
+    }
+
+    Deployment_Node(cdn_node, "CloudFront", "AWS CloudFront") {
+        Container(cdn, "CloudFront Distribution", "AWS CloudFront", "TLS and routing for short.example.com")
+        Container(waf, "AWS WAF", "AWS WAF", "Rate-based and managed rule protection")
+    }
+
+    Deployment_Node(s3_node, "S3", "Amazon S3") {
+        Container(s3, "Static Web Assets", "Amazon S3", "React SPA build artifacts")
+    }
+}
+
+Deployment_Node(mongo_cloud, "MongoDB Atlas", "MongoDB Atlas") {
+    ContainerDb(mongo, "MongoDB Atlas", "MongoDB", "External persistence; hash indexed")
+}
+
+Rel(cdn, apigw, "Routes API and redirect traffic", "HTTPS")
+Rel(waf, cdn, "Protects", "HTTPS")
+Rel(apigw, shorten_fn, "POST /api/shorten", "AWS proxy")
+Rel(apigw, redirect_fn, "GET /{hash}", "AWS proxy")
+Rel(shorten_fn, mongo, "Writes mappings", "MongoDB wire protocol")
+Rel(redirect_fn, cache, "Reads/writes cache", "Redis protocol")
+Rel(redirect_fn, mongo, "Reads on cache miss", "MongoDB wire protocol")
+Rel(cdn, s3, "Origin for SPA", "HTTPS")
+
+@enduml

@@ -1,7 +1,7 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-title System Context diagram for URL Shortener
+title System Context diagram for URL Shortener v2
 
 Person(user, "User", "Creates short URLs and follows short links to destination pages")
 

@@ -1,0 +1,34 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container diagram for URL Shortener v2
+
+Person(user, "User", "Uses short.example.com to shorten URLs and follow short links")
+
+System_Boundary(shortener, "URL Shortener App") {
+    Container(waf, "Web Application Firewall", "AWS WAF", "Rate limiting and bot protection in front of CloudFront")
+    Container(cdn, "CloudFront", "AWS CloudFront", "Front door for short.example.com; serves SPA and routes API/redirect traffic")
+    Container(s3, "Static Web Assets", "Amazon S3", "Hosts built React SPA")
+    Container(web_app, "Web Application", "React (vanilla SPA)", "Paste full URL; calls API Gateway to shorten")
+    Container(apigw, "API Gateway", "Amazon API Gateway", "Routes, throttling, and API governance")
+    Container(shorten_fn, "Shorten Function", "AWS Lambda", "8-char hash via NPM module; persists to MongoDB; returns short URL")
+    Container(redirect_fn, "Redirect Function", "AWS Lambda", "Cache-first lookup; Mongo on miss; HTTP 302 redirect")
+}
+
+ContainerDb_Ext(mongo, "MongoDB Atlas", "MongoDB Atlas", "External store for full URL and hash; hash column indexed")
+ContainerDb_Ext(cache, "ElastiCache", "AWS ElastiCache (in-memory)", "External cache for hash-to-URL lookups; 8h TTL")
+
+Rel(user, waf, "Uses", "HTTPS")
+Rel(waf, cdn, "Filters requests to", "HTTPS")
+Rel(cdn, s3, "Fetches SPA assets", "HTTPS")
+Rel(user, web_app, "Uses", "HTTPS")
+Rel(web_app, apigw, "POST /api/shorten", "HTTPS")
+Rel(cdn, apigw, "Proxies GET /{hash}", "HTTPS")
+Rel(apigw, shorten_fn, "Invokes", "AWS proxy integration")
+Rel(apigw, redirect_fn, "Invokes", "AWS proxy integration")
+Rel(shorten_fn, mongo, "Persists full URL and hash", "MongoDB wire protocol")
+Rel(redirect_fn, cache, "Checks cache; stores on miss", "Redis protocol")
+Rel(redirect_fn, mongo, "Looks up hash on cache miss", "MongoDB wire protocol")
+Rel(redirect_fn, user, "Redirects to full URL", "HTTP 302")
+
+@enduml

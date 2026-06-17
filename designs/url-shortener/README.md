@@ -10,8 +10,8 @@ Provide URL shortening and redirect resolution with low operational overhead for
 
 ### Context
 
-- **User** interacts with **URL Shortener App** over HTTPS.
-- **MongoDB Atlas** and **ElastiCache** are external managed services (outside the app boundary); the app uses them for storage and cache.
+- **User** interacts with **URL Shortener App** over HTTPS to shorten URLs and follow short links.
+- Technology and external data services are shown at the Container level.
 
 ### Containers (in scope)
 
