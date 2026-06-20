@@ -43,9 +43,16 @@ Output is written to `designs/<slug>/diagrams/`. Default format is SVG. Override
 PLANTUML_FORMAT=png ./scripts/render.sh my-design
 ```
 
-## Cursor skill
+## Cursor skill and global command
 
-The project skill at `.cursor/skills/c4-system-design/SKILL.md` enforces the preview-first workflow. Invoke it when creating or updating C4 diagrams in this repo.
+| Entry point | Scope | Use |
+|-------------|-------|-----|
+| **`/c4-system-design`** | Any workspace | Slash command — picks C4 level, shows pipeline guide, writes files here |
+| **Project skill** | This repo | `.cursor/skills/c4-system-design/SKILL.md` — full preview-first rules |
+
+Config: `~/.cursor/c4-system-design.config.json` points `repoRoot` at this repository so diagrams are always created here even when the command runs from another project.
+
+**Typical flow:** type `/c4-system-design` → choose Context / Container / Component / Dynamic / Deployment → describe your architecture → review preview → say **green light** → files land under `designs/<slug>/`.
 
 ## Phase 1 preview example
 

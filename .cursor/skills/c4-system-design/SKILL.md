@@ -5,6 +5,7 @@ description: >-
   descriptions. Use when the user asks for system design diagrams, C4 context/container/
   component/dynamic/deployment diagrams, or PlantUML C4 files under designs/. Enforces
   preview-first workflow — never write repo files until the user explicitly approves.
+  Also use when the user invokes /c4-system-design from any workspace.
 ---
 
 # C4 System Design (PlantUML)
@@ -13,7 +14,15 @@ Personal system-design repo. Diagrams are created **ad hoc from the user's descr
 
 **The user owns the architecture.** Translate their intent into correct C4-PlantUML. Do not invent elements, containers, or relationships.
 
-Repo root: `/Users/vitorvicente/Documents/it-projects/system-design-pocs`
+## Repo root and global command
+
+| Item | Path |
+|------|------|
+| **Repo root** | `/Users/vitorvicente/Documents/it-projects/system-design-pocs` |
+| **Global slash command** | `/c4-system-design` (from any workspace) |
+| **Command config** | `~/.cursor/c4-system-design.config.json` → `repoRoot` |
+
+When invoked via `/c4-system-design`, read the user command at `~/.cursor/commands/c4-system-design.md` first (AskQuestion for C4 level, pipeline guide), then follow this skill. All file I/O stays under `repoRoot`; call `move_agent_to_root` before Phase 2 if needed.
 
 ## When to use
 
